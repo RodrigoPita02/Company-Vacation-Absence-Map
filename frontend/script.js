@@ -70,96 +70,102 @@ async function adicionarFerias(event) {
     }
 }
 
-// 🟢 Carregar lista de férias na tabela e atualizar calendário
+// 🟢 Função para carregar férias e atualizar o calendário
 async function carregarFerias() {
-    const response = await fetch('http://localhost:5000/ferias');
-    const ferias = await response.json();
+    try {
+        const response = await fetch('http://localhost:5000/ferias');
+        const ferias = await response.json();
 
-    let tabela = document.getElementById('feriasTableBody');
-    tabela.innerHTML = ''; // Limpa a tabela
+        let tabela = document.getElementById('feriasTableBody');
+        tabela.innerHTML = ''; // Limpa a tabela
 
-    ferias.forEach(f => {
-        let row = tabela.insertRow();
-        row.insertCell(0).textContent = f.nome;
-        row.insertCell(1).textContent = f.data_inicio;
-        row.insertCell(2).textContent = f.data_fim;
-    });
+        ferias.forEach(f => {
+            let row = tabela.insertRow();
+            row.insertCell(0).textContent = f.nome;
+            row.insertCell(1).textContent = f.data_inicio;
+            row.insertCell(2).textContent = f.data_fim;
+        });
 
-    atualizarCalendario(ferias);
+        // 🟢 Atualiza o calendário APÓS carregar as férias
+        atualizarCalendario(ferias);
+
+    } catch (error) {
+        console.error("Erro ao carregar férias:", error);
+    }
 }
 
 function atualizarCalendario(ferias) {
     let calendarioEl = document.getElementById('calendario');
 
-    // Verifica se o calendário já existe para evitar duplicações
     if (calendarioEl.fullCalendarInstance) {
-        calendarioEl.fullCalendarInstance.removeAllEvents();
-        ferias.forEach(f => {
-            // Corrige a data final ao adicionar 1 dia (já que o FullCalendar não inclui o último dia)
-            let endDate = new Date(f.data_fim);
-            endDate.setDate(endDate.getDate() + 1); // Adiciona 1 dia para corrigir o comportamento
-
-            calendarioEl.fullCalendarInstance.addEvent({
-                title: f.nome,
-                start: f.data_inicio,
-                end: endDate // Corrige a data final
-            });
-        });
-    } else {
-        let calendario = new FullCalendar.Calendar(calendarioEl, {
-            locale: 'pt',
-            initialView: 'dayGridMonth',
-            events: ferias.map(f => {
-                // Corrige a data final aqui também
-                let endDate = new Date(f.data_fim);
-                endDate.setDate(endDate.getDate() + 1);
-                return {
-                    title: f.nome,
-                    start: f.data_inicio,
-                    end: endDate
-                };
-            })
-        });
-
-        calendario.render();
-        calendarioEl.fullCalendarInstance = calendario; // Salva referência
+        calendarioEl.fullCalendarInstance.destroy();
     }
-}
 
-// Função para inicializar o calendário
-function inicializarCalendario() {
-    let calendarioEl = document.getElementById('calendario'); // O elemento onde o calendário será renderizado
+    console.log("📅 Atualizando calendário com eventos:");
+    console.table(ferias);  // 🔴 Exibe os eventos formatados no console para debug
 
     let calendario = new FullCalendar.Calendar(calendarioEl, {
-        locale: 'pt',  // Define o idioma como português
-        initialView: 'dayGridMonth',  // Exibe o calendário no formato de mês
+        locale: 'pt',
+        initialView: 'dayGridMonth',
+        events: ferias.map(f => {
+            let endDate = new Date(f.data_fim);
+            endDate.setDate(endDate.getDate() + 1);
+
+            console.log(`🎨 Evento: ${f.nome} - Cor: ${f.cor}`); // 🔴 Verifica se a cor está chegando
+
+            return {
+                title: f.nome,
+                start: f.data_inicio,
+                end: endDate,
+                backgroundColor: f.cor || '#808080',  // 🔴 Aplica a cor correta (ou cinza se não tiver)
+                borderColor: f.cor || '#808080'        // 🔴 Mantém a borda da mesma cor
+            };
+        })
+    });
+
+    calendario.render();
+    calendarioEl.fullCalendarInstance = calendario;
+}
+
+function inicializarCalendario() {
+    let calendarioEl = document.getElementById('calendario');
+
+    let calendario = new FullCalendar.Calendar(calendarioEl, {
+        locale: 'pt',
+        initialView: 'dayGridMonth',
         events: async function (fetchInfo, successCallback, failureCallback) {
             try {
-                const response = await fetch('http://localhost:5000/ferias');  // Obtém as férias da API
+                const response = await fetch('http://localhost:5000/ferias');
                 const ferias = await response.json();
 
-                // Mapeia os dados das férias para o formato esperado pelo FullCalendar
+                console.log("📅 Carregando eventos no calendário:");
+                console.table(ferias);
+
                 let eventos = ferias.map(f => {
-                    // Adiciona 1 dia à data de fim para corrigir a exibição no calendário
                     let dataFim = new Date(f.data_fim);
-                    dataFim.setDate(dataFim.getDate() + 1);  // Adiciona 1 dia à data de fim
+                    dataFim.setDate(dataFim.getDate() + 1); // Corrige a data final
+
+                    // Verifica se a cor está definida e usa a cor do cargo
+                    let cor = f.cor || '#808080'; // #808080 é a cor de fallback
 
                     return {
-                        title: f.nome, // Título do evento, nome do funcionário
-                        start: f.data_inicio, // Início das férias
-                        end: dataFim.toISOString(),  // Fim das férias (corrigido)
+                        title: f.nome,
+                        start: f.data_inicio,
+                        end: dataFim.toISOString(),
+                        backgroundColor: cor, // Aplica a cor
+                        borderColor: cor      // Mantém a borda com a mesma cor
                     };
                 });
-                // Sucesso ao carregar os eventos no calendário
+
                 successCallback(eventos);
             } catch (error) {
                 console.error("Erro ao carregar eventos:", error);
-                failureCallback(error);  // Caso haja falha ao carregar os eventos
+                failureCallback(error); // Caso haja erro ao carregar eventos
             }
         }
     });
 
-    calendario.render();  // Renderiza o calendário na página
+    calendario.render(); // Renderiza o calendário com os eventos carregados
 }
 
 // Função para mostrar feedback visual
