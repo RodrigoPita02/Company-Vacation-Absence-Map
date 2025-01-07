@@ -4,7 +4,8 @@ const bodyParser = require('body-parser');
 const path = require('path'); // Para servir arquivos estáticos do frontend
 const funcionariosRoutes = require('./routes/funcionarios');
 const feriasRoutes = require('./routes/ferias');
-const cargosRoutes = require('./routes/cargos'); // Certifique-se de que a rota está aqui!
+const cargosRoutes = require('./routes/cargos'); 
+const faltasRouter = require('./routes/faltas'); 
 
 const app = express();
 
@@ -15,7 +16,8 @@ app.use(bodyParser.json());
 // Rotas para os funcionários e férias
 app.use('/funcionarios', funcionariosRoutes);
 app.use('/ferias', feriasRoutes);
-app.use('/cargos', cargosRoutes); // Adicionando a rota de cargos
+app.use('/cargos', cargosRoutes); 
+app.use('/faltas', faltasRouter); 
 
 // Servir o frontend estático (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
