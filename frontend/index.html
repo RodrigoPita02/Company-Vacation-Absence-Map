@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Férias</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Link para o FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Google Font para aparência moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet"/>
+</head>
+<body>
+
+    <!-- 🟢 MENU DE NAVEGAÇÃO -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Calendário</a></li>
+            <li><a href="funcionarios.html">Gerir Funcionários</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Gestão de Férias</h1>
+
+        <!-- Formulário para Adicionar Férias -->
+        <div class="form-container">
+            <form id="feriasForm">
+                <label for="funcionarioSelect">Funcionário:</label>
+                <select id="funcionarioSelect" class="input-field"></select>
+
+                <label for="dataInicio">Data de Início:</label>
+                <input type="date" id="dataInicio" class="input-field">
+
+                <label for="dataFim">Data de Fim:</label>
+                <input type="date" id="dataFim" class="input-field">
+
+                <button type="submit" class="submit-btn"><i class="fas fa-plus-circle"></i> Adicionar Férias</button>
+            </form>
+        </div>
+
+        <!-- Tabela para Listar Férias -->
+        <h2>Férias Agendadas</h2>
+        <table id="tabela-ferias" class="table">
+            <thead>
+                <tr>
+                    <th>Funcionário</th>
+                    <th>Data Início</th>
+                    <th>Data Fim</th>
+                </tr>
+            </thead>
+            <tbody id="feriasTableBody"></tbody>
+        </table>
+
+        <br>
+        <br>
+        <br>
+        <!-- Calendário -->
+        <h2>Calendário de Férias</h2>
+        <div id="calendario"></div>
+    </div>
+
+    <!-- Carregue o jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Carregue o FullCalendar (versão mais recente) -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+
+    <!-- Seu script.js -->
+    <script src="script.js"></script>
+</body>
+</html>

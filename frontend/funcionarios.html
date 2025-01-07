@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Funcionários</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@400;500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- 🟢 MENU DE NAVEGAÇÃO -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Calendário</a></li>
+            <li><a href="funcionarios.html">Gerir Funcionários</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Gestão de Funcionários</h1>
+
+        <!-- Formulário para Adicionar Funcionários -->
+        <div class="form-container">
+            <form id="funcionarioForm">
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" class="input-field" required>
+
+                <label for="cargo">Cargo:</label>
+                <select id="cargo" class="input-field"></select>
+
+                <button type="submit" class="submit-btn">Adicionar Funcionário</button>
+            </form>
+        </div>
+
+        <!-- Modal de Edição de Funcionário -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Editar Funcionário</h2>
+                <form id="editFuncionarioForm">
+                    <input type="hidden" id="editFuncionarioId"> <!-- ID oculto -->
+
+                    <label for="editNome">Nome:</label>
+                    <input type="text" id="editNome" class="input-field">
+
+                    <label for="editCargo">Cargo:</label>
+                    <select id="editCargo" class="input-field"></select>
+
+                    <button type="submit" class="submit-btn">Salvar Alterações</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabela para Listar Funcionários -->
+        <h2>Lista de Funcionários</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Cargo</th>
+                    <th>Cor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="funcionariosTable"></tbody>
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="funcionarios.js"></script>
+</body>
+
+</html>
