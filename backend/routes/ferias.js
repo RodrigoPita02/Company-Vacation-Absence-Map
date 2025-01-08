@@ -2,20 +2,35 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
-// Rota para listar todas as férias (agora incluindo a cor do cargo)
+// Rota para listar todas as férias (com filtros de funcionário e mês)
 router.get('/', (req, res) => {
-    const sql = `
+    const { funcionario_id, mes } = req.query;  // Obtém os parâmetros de filtro
+
+    let sql = `
         SELECT ferias.id, funcionarios.nome, ferias.data_inicio, ferias.data_fim, cargos.cor
         FROM ferias 
         JOIN funcionarios ON ferias.funcionario_id = funcionarios.id
         JOIN cargos ON funcionarios.cargo_id = cargos.id
+        WHERE 1=1
     `;
-    db.query(sql, (err, results) => {
+    
+    // Aplica o filtro de funcionário, se fornecido
+    if (funcionario_id) {
+        sql += ` AND ferias.funcionario_id = ?`;
+    }
+
+    // Aplica o filtro de mês, se fornecido
+    if (mes) {
+        sql += ` AND MONTH(ferias.data_inicio) = ?`;
+    }
+
+    // Executa a consulta com os filtros
+    db.query(sql, [funcionario_id, mes].filter(Boolean), (err, results) => {
         if (err) {
             console.error("Erro ao buscar férias:", err);
             return res.status(500).json({ error: "Erro ao buscar férias" });
         }
-        res.json(results);  // Agora inclui a cor do cargo
+        res.json(results);  // Retorna os resultados filtrados
     });
 });
 

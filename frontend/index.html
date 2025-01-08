@@ -29,7 +29,7 @@
     <div class="container">
         <h1>Gestão de Férias</h1>
 
-        <!-- Formulário para Adicionar Férias -->
+        <!-- 🟢 Formulário para Adicionar Férias -->
         <div class="form-container">
             <form id="feriasForm">
                 <label for="funcionarioSelect">Funcionário:</label>
@@ -45,7 +45,7 @@
             </form>
         </div>
 
-        <!-- Modal de Edição de Férias -->
+        <!-- 🟢 Modal de Edição de Férias -->
         <div id="editarFeriasModal" class="modal">
             <div class="modal-content">
                 <h4>Editar Férias</h4>
@@ -62,30 +62,55 @@
                     <input type="date" id="modalDataFim" class="input-field" required>
 
                     <button type="submit" class="submit-btn">Salvar</button>
-                    <br>
-                    <br>
+                    <br><br>
                     <button type="button" id="cancelarEditarFerias" class="cancel-btn">Cancelar</button>
                 </form>
             </div>
         </div>
 
-        <!-- Tabela para Listar Férias -->
+        <!-- 🟢 Tabela para Listar Férias -->
         <h2>Férias Agendadas</h2>
+        <!-- Filtro de Funcionário e Mês -->
+        <div class="filters">
+            <label for="filtroFuncionario">Funcionário:</label>
+            <select id="filtroFuncionario" class="input-field">
+                <option value="">Todos os Funcionários</option>
+            </select>
+
+            <label for="filtroMes">Mês:</label>
+            <select id="filtroMes" class="input-field">
+                <option value="">Selecione um Mês</option>
+                <option value="01">Janeiro</option>
+                <option value="02">Fevereiro</option>
+                <option value="03">Março</option>
+                <option value="04">Abril</option>
+                <option value="05">Maio</option>
+                <option value="06">Junho</option>
+                <option value="07">Julho</option>
+                <option value="08">Agosto</option>
+                <option value="09">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+
+            <button type="button" id="aplicarFiltro" class="submit-btn">Aplicar Filtro</button>
+        </div>
+        <br>
+        <br>
         <table id="tabela-ferias" class="table">
             <thead>
                 <tr>
                     <th>Funcionário</th>
                     <th>Data Início</th>
                     <th>Data Fim</th>
-                    <th>Ações</th> <!-- Coluna de Ações -->
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody id="feriasTableBody"></tbody>
         </table>
 
-        <br>
-        <br>
-        <br>
+        <br><br><br>
         <!-- Calendário -->
         <h2>Calendário de Férias</h2>
         <div id="calendario"></div>

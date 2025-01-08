@@ -1,34 +1,39 @@
 document.addEventListener('DOMContentLoaded', () => {
     carregarFuncionarios();
-    carregarFerias();
     inicializarCalendario();
+
+    // Verifica se o botão é encontrado
+    const aplicarFiltroBtn = document.getElementById('aplicarFiltro');
+    if (aplicarFiltroBtn) {
+        console.log('Botão encontrado');
+        aplicarFiltroBtn.addEventListener('click', aplicarFiltro);
+    } else {
+        console.error('Botão "aplicarFiltro" não encontrado');
+    }
+
+    carregarFerias();
 });
 
+// Carregar os funcionários e popular os selects
 async function carregarFuncionarios() {
     const response = await fetch('http://localhost:5000/funcionarios');
     const funcionarios = await response.json();
 
-    const select = document.getElementById('funcionarioSelect');  // Dropdown para selecionar o funcionário
-
-    if (!select) {
-        console.error("Erro: Dropdown de funcionários não encontrado.");
-        return;
-    }
-
-    // Limpa e adiciona a opção inicial
-    select.innerHTML = '<option value="">Selecione um funcionário</option>';
-
+    // Carregar o filtro de funcionários (dropdown)
+    const selectFuncionario = document.getElementById('filtroFuncionario');
     funcionarios.forEach(func => {
         let option = document.createElement('option');
-        option.value = func.id;  // O valor será o ID do funcionário
-        option.textContent = func.nome;  // O texto será o nome do funcionário
-        select.appendChild(option);  // Adiciona a opção à dropdown
+        option.value = func.id;
+        option.textContent = func.nome;
+        selectFuncionario.appendChild(option);
     });
 
-    console.log("Funcionários carregados com sucesso.");
+    carregarFerias();
+    // Carregar o select de funcionário no formulário de adicionar férias
+    carregarFuncionariosSelect(funcionarios);
 }
 
-// 🟢 Carregar os funcionários na dropdown
+// 🟢 Carregar os funcionários na dropdown de adicionar férias
 function carregarFuncionariosSelect(funcionarios) {
     const select = document.getElementById('funcionarioSelect');
     if (!select) {
@@ -64,31 +69,80 @@ async function adicionarFerias(event) {
 
     if (response.ok) {
         showFeedback('success', 'Férias adicionadas com sucesso!');
-        carregarFerias();
+        carregarFerias(); // Atualiza as férias
+        inicializarCalendario();
     } else {
         showFeedback('error', 'Erro ao adicionar férias!');
     }
 }
 
-// 🟢 Função para carregar férias e atualizar o calendário
-async function carregarFerias() {
-    const response = await fetch('http://localhost:5000/ferias');
+// Função de filtro
+async function aplicarFiltro() {
+    const funcionario = document.getElementById('filtroFuncionario').value;
+    const mes = document.getElementById('filtroMes').value;
+
+    console.log('Filtro aplicado: ', funcionario, mes);
+    
+    // Carregar férias filtradas
+    const feriasFiltradas = await carregarFerias(funcionario, mes);  // Passa o valor correto (funcionario) para o filtro
+    
+    // Atualizar o calendário com as férias filtradas
+    atualizarCalendario(feriasFiltradas);
+
+    // Mudar para o mês selecionado no filtro
+    if (mes) {
+        const anoAtual = new Date().getFullYear();  // Pega o ano atual
+        const dataInicioMes = new Date(`${anoAtual}-${mes}-01`);  // Cria a data com o ano correto
+
+        // Acessa o calendário renderizado e navega para o mês selecionado
+        const calendarioEl = document.getElementById('calendario');
+        if (calendarioEl && calendarioEl.fullCalendarInstance) {
+            calendarioEl.fullCalendarInstance.gotoDate(dataInicioMes);  // Navega para o mês filtrado
+        } else {
+            console.error('Erro: Instância do FullCalendar não encontrada.');
+        }
+    }
+}
+
+// 🟢 Função para carregar férias com filtro
+async function carregarFerias(funcionarioId = '', mes = '') {
+    let url = 'http://localhost:5000/ferias';
+
+    // Aplica o filtro de funcionário e mês, se houver
+    if (funcionarioId) {
+        url += `?funcionario_id=${funcionarioId}`;
+    }
+    if (mes) {
+        url += (url.includes('?') ? '&' : '?') + `mes=${mes}`;
+    }
+
+    console.log("URL da API com filtro: ", url);  // Verifique a URL gerada
+
+    const response = await fetch(url);
     const ferias = await response.json();
 
+    console.log("Resposta da API:", ferias);  // Verifique o que está sendo retornado
+
     const feriasTableBody = document.getElementById('feriasTableBody');
-    feriasTableBody.innerHTML = ''; // Limpa a tabela
+    feriasTableBody.innerHTML = '';  // Limpa a tabela
+
+    // Verifica se as férias foram retornadas
+    if (ferias.length === 0) {
+        feriasTableBody.innerHTML = '<tr><td colspan="4">Nenhuma férias encontrada.</td></tr>';
+        return [];  // Retorna um array vazio se não houver resultados
+    }
 
     ferias.forEach(feria => {
+        console.log(`Adicionando férias: ${feria.nome}`);  // Verifique se está entrando aqui
+    
         const row = document.createElement('tr');
-        
-        // Formata as datas para remover a parte da hora
         const dataInicioFormatted = new Date(feria.data_inicio).toLocaleDateString('pt-PT');
         const dataFimFormatted = new Date(feria.data_fim).toLocaleDateString('pt-PT');
-
+    
         row.innerHTML = `
-            <td>${feria.nome}</td> <!-- Corrigido: agora usa 'nome' diretamente -->
-            <td>${dataInicioFormatted}</td> <!-- Exibindo a data formatada -->
-            <td>${dataFimFormatted}</td> <!-- Exibindo a data formatada -->
+            <td>${feria.nome}</td>
+            <td>${dataInicioFormatted}</td>
+            <td>${dataFimFormatted}</td>
             <td>
                 <button class="action-btn edit" onclick="editarFerias(${feria.id})">Editar</button>
                 <button class="action-btn delete" onclick="excluirFerias(${feria.id})">Excluir</button>
@@ -97,6 +151,8 @@ async function carregarFerias() {
         
         feriasTableBody.appendChild(row);
     });
+
+    return ferias;  // Retorna as férias filtradas
 }
 
 // Função para editar férias
