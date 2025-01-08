@@ -72,27 +72,111 @@ async function adicionarFerias(event) {
 
 // 🟢 Função para carregar férias e atualizar o calendário
 async function carregarFerias() {
-    try {
-        const response = await fetch('http://localhost:5000/ferias');
-        const ferias = await response.json();
+    const response = await fetch('http://localhost:5000/ferias');
+    const ferias = await response.json();
 
-        let tabela = document.getElementById('feriasTableBody');
-        tabela.innerHTML = ''; // Limpa a tabela
+    const feriasTableBody = document.getElementById('feriasTableBody');
+    feriasTableBody.innerHTML = ''; // Limpa a tabela
 
-        ferias.forEach(f => {
-            let row = tabela.insertRow();
-            row.insertCell(0).textContent = f.nome;
-            row.insertCell(1).textContent = f.data_inicio;
-            row.insertCell(2).textContent = f.data_fim;
+    ferias.forEach(feria => {
+        const row = document.createElement('tr');
+        
+        // Formata as datas para remover a parte da hora
+        const dataInicioFormatted = new Date(feria.data_inicio).toLocaleDateString('pt-PT');
+        const dataFimFormatted = new Date(feria.data_fim).toLocaleDateString('pt-PT');
+
+        row.innerHTML = `
+            <td>${feria.nome}</td> <!-- Corrigido: agora usa 'nome' diretamente -->
+            <td>${dataInicioFormatted}</td> <!-- Exibindo a data formatada -->
+            <td>${dataFimFormatted}</td> <!-- Exibindo a data formatada -->
+            <td>
+                <button class="action-btn edit" onclick="editarFerias(${feria.id})">Editar</button>
+                <button class="action-btn delete" onclick="excluirFerias(${feria.id})">Excluir</button>
+            </td>
+        `;
+        
+        feriasTableBody.appendChild(row);
+    });
+}
+
+// Função para editar férias
+async function editarFerias(id) {
+    const response = await fetch(`http://localhost:5000/ferias/${id}`);
+    const feria = await response.json();
+
+    // Carrega os funcionários no dropdown
+    const funcionariosResponse = await fetch('http://localhost:5000/funcionarios');
+    const funcionarios = await funcionariosResponse.json();
+
+    const funcionarioSelect = document.getElementById('modalFuncionarioSelect');
+    funcionarioSelect.innerHTML = '<option value="">Selecione um funcionário</option>';
+    
+    funcionarios.forEach(funcionario => {
+        const option = document.createElement('option');
+        option.value = funcionario.id;
+        option.textContent = funcionario.nome;
+        funcionarioSelect.appendChild(option);
+    });
+
+    // Preenche os campos do modal com os dados das férias
+    document.getElementById('modalDataInicio').value = feria.data_inicio.split('T')[0];
+    document.getElementById('modalDataFim').value = feria.data_fim.split('T')[0];
+
+    // Exibe o modal
+    const modal = document.getElementById('editarFeriasModal');
+    modal.style.display = 'block';
+
+    // Função de cancelar
+    document.getElementById('cancelarEditarFerias').onclick = () => {
+        modal.style.display = 'none';
+    };
+
+    // Altera o comportamento do formulário de edição
+    const form = document.getElementById('editarFeriasForm');
+    form.onsubmit = async (event) => {
+        event.preventDefault();
+
+        const funcionario_id = document.getElementById('modalFuncionarioSelect').value;
+        const data_inicio = document.getElementById('modalDataInicio').value;
+        const data_fim = document.getElementById('modalDataFim').value;
+
+        // Faz a requisição para atualizar as férias
+        const updateResponse = await fetch(`http://localhost:5000/ferias/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ funcionario_id, data_inicio, data_fim })
         });
 
-        // 🟢 Atualiza o calendário APÓS carregar as férias
-        atualizarCalendario(ferias);
+        if (updateResponse.ok) {
+            alert('Férias atualizadas com sucesso!');
+            carregarFerias();
+            inicializarCalendario();
+            modal.style.display = 'none';
+        } else {
+            alert('Erro ao atualizar férias');
+        }
+    };
+}
 
-    } catch (error) {
-        console.error("Erro ao carregar férias:", error);
+// Função para excluir férias
+async function excluirFerias(id) {
+    const response = confirm('Tem certeza de que deseja excluir as férias?');
+    
+    if (response) {
+        const deleteResponse = await fetch(`http://localhost:5000/ferias/${id}`, { method: 'DELETE' });
+
+        if (deleteResponse.ok) {
+            alert('Férias excluídas com sucesso!');
+            inicializarCalendario();
+            carregarFerias();
+        } else {
+            alert('Erro ao excluir férias');
+        }
     }
 }
+
+// Carregar as férias na tabela ao iniciar a página
+document.addEventListener('DOMContentLoaded', carregarFerias);
 
 function atualizarCalendario(ferias) {
     let calendarioEl = document.getElementById('calendario');

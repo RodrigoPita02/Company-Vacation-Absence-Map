@@ -90,11 +90,17 @@ router.put('/:id', (req, res) => {
     const { funcionario_id, data_falta, data_fim, motivo } = req.body;
     const { id } = req.params;
 
+    // Log para verificar o que está sendo enviado
+    console.log("Dados recebidos para atualização:", {
+        funcionario_id, data_falta, data_fim, motivo
+    });
+
+    // Verifica se os campos obrigatórios estão presentes
     if (!funcionario_id || !data_falta || !motivo) {
         return res.status(400).json({ error: "Todos os campos são obrigatórios" });
     }
 
-    // Verifica se data_fim foi fornecida, caso contrário, usa data_falta
+    // Caso a data_fim não seja fornecida, usa a data_falta como data_fim
     const data_fim_valida = data_fim || data_falta; // Se não passar data_fim, usa data_falta
 
     // Obter a cor do cargo do funcionário
@@ -117,12 +123,14 @@ router.put('/:id', (req, res) => {
             if (err) {
                 console.error("Erro ao atualizar falta:", err);
                 return res.status(500).json({ error: "Erro ao atualizar falta" });
-            } else {
-                res.json({ message: "Falta atualizada com sucesso" });
             }
+
+            // Se a atualização for bem-sucedida, retorna uma mensagem de sucesso
+            res.json({ message: "Falta atualizada com sucesso" });
         });
     });
 });
+
 
 // Rota para excluir uma falta
 router.delete('/:id', (req, res) => {

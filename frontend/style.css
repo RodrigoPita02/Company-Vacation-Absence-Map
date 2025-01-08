@@ -10,15 +10,19 @@
     background-color: #3498db;
     padding: 15px 0;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .navbar ul {
     list-style: none;
     text-align: center;
+    margin: 0;
+    padding: 0;
 }
 
 .navbar ul li {
-    display: inline;
+    display: inline-block;
     margin: 0 15px;
 }
 
@@ -32,6 +36,18 @@
 
 .navbar ul li a:hover {
     color: #f1c40f;
+}
+
+/* Responsividade para telas menores */
+@media screen and (max-width: 768px) {
+    .navbar ul li {
+        display: block;
+        margin: 10px 0;
+    }
+
+    .navbar ul li a {
+        font-size: 16px;
+    }
 }
 
 body {
@@ -48,7 +64,6 @@ h1, h2 {
 }
 
 .container {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background-color: #fff;
@@ -95,6 +110,23 @@ label {
 
 .submit-btn:hover {
     background-color: #2980b9;
+    transform: scale(1.05);
+}
+
+.cancel-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #ff0000;
+    border: none;
+    color: white;
+    font-size: 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background-color: #a40303;
     transform: scale(1.05);
 }
 
@@ -227,24 +259,26 @@ label {
 
 /* Estilos do Modal */
 .modal {
-    display: none; /* Inicialmente invisível */
+    display: none; /* Inicialmente oculto */
     position: fixed;
-    z-index: 1;
+    z-index: 1; /* Coloca o modal acima dos outros elementos */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.4); /* Fundo transparente */
+    background-color: rgba(0,0,0,0.4); /* Fundo escuro */
+    overflow: auto;
     padding-top: 60px;
-}
-
-.modal-content {
+  }
+  
+  .modal-content {
     background-color: #fefefe;
     margin: 5% auto;
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
-}
+  }
+  
 
 .close {
     position: absolute;

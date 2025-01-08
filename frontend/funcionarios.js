@@ -2,13 +2,23 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarCargos();
     carregarFuncionarios();
     document.getElementById('funcionarioForm').addEventListener('submit', adicionarFuncionario);
+
+    // 🟢 Fechar modal
+    document.querySelector('.close').addEventListener('click', () => {
+        document.getElementById('editModal').style.display = 'none';
+    });
+
+    // 🟢 Fechar modal com o botão de cancelar (ajustado para garantir que o botão de cancelar funcione)
+    document.getElementById('cancelarEditarFuncionarios').addEventListener('click', () => {
+        document.getElementById('editModal').style.display = 'none';
+    });
 });
 
 // 🟢 Carregar cargos para o dropdown
 async function carregarCargos() {
     const select = document.getElementById('cargo');
     const editSelect = document.getElementById('editCargo');
-    
+
     if (!select || !editSelect) {
         console.error("Erro: O elemento <select id='cargo'> ou <select id='editCargo'> não foi encontrado.");
         return;
@@ -47,11 +57,6 @@ function abrirModalEdicao(id, nome, cargoId) {
 
     document.getElementById('editModal').style.display = 'flex';
 }
-
-// 🟢 Fechar modal
-document.querySelector('.close').addEventListener('click', () => {
-    document.getElementById('editModal').style.display = 'none';
-});
 
 // 🟢 Enviar atualização do funcionário
 document.getElementById('editFuncionarioForm').addEventListener('submit', async (event) => {
@@ -139,26 +144,4 @@ async function excluirFuncionario(id) {
             alert('Erro ao excluir funcionário.');
         }
     }
-}
-
-// 🟢 Editar funcionário
-function editarFuncionario(id, nome, cargo_id) {
-    const novoNome = prompt("Novo nome do funcionário:", nome);
-    if (!novoNome) return;
-
-    const novoCargo = prompt("Novo ID do cargo:", cargo_id);
-    if (!novoCargo) return;
-
-    fetch(`http://localhost:5000/funcionarios/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome: novoNome, cargo_id: novoCargo }),
-    }).then(response => {
-        if (response.ok) {
-            alert("Funcionário atualizado com sucesso!");
-            carregarFuncionarios();
-        } else {
-            alert("Erro ao atualizar funcionário.");
-        }
-    });
 }

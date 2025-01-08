@@ -56,8 +56,8 @@ async function carregarFaltasTabela() {
             <td>${dataFim}</td>
             <td>${falta.motivo}</td>
             <td>
-                <button class="editarFalta" onclick="editarFalta(${falta.id})">Editar</button>
-                <button class="apagarFalta" onclick="apagarFalta(${falta.id})">Apagar</button>
+                <button class="action-btn edit" onclick="editarFalta(${falta.id})">Editar</button>
+                <button class="action-btn delete" onclick="apagarFalta(${falta.id})">Apagar</button>
             </td>
         `;
 
@@ -85,14 +85,36 @@ async function editarFalta(id) {
         return;
     }
 
-    // Preenche o modal com os dados da falta
-    document.getElementById('funcionarioSelect').value = falta.funcionario_id;
-    document.getElementById('dataInicio').value = falta.data_falta.split('T')[0];  // Apenas a parte da data
-    document.getElementById('dataFim').value = falta.data_fim ? falta.data_fim.split('T')[0] : ''; // Se houver, caso contrário, vazio
-    document.getElementById('motivo').value = falta.motivo;
+    // Faz a requisição para carregar a lista de funcionários
+    const funcionariosResponse = await fetch('http://localhost:5000/funcionarios');
+    const funcionarios = await funcionariosResponse.json();
 
-    // Exibe o modal
-    document.getElementById('editarModal').style.display = 'block';
+    // Preenche a dropdown com os funcionários no modal
+    const funcionarioSelect = document.getElementById('modalFuncionarioSelect');
+    funcionarioSelect.innerHTML = '<option value="">Selecione um funcionário</option>'; // Reseta a dropdown
+
+    funcionarios.forEach(funcionario => {
+        const option = document.createElement('option');
+        option.value = funcionario.id;
+        option.textContent = funcionario.nome;
+        funcionarioSelect.appendChild(option);
+    });
+
+    // Seleciona o funcionário atual da falta
+    funcionarioSelect.value = falta.funcionario_id;
+
+    // Preenche os campos do modal com os dados da falta
+    document.getElementById('modalDataInicio').value = falta.data_falta.split('T')[0]; // Formata a data
+    document.getElementById('modalDataFim').value = falta.data_fim ? falta.data_fim.split('T')[0] : ''; // Formata a data de fim
+    document.getElementById('modalMotivo').value = falta.motivo;
+
+    // Verifica se o modal existe antes de tentar acessá-lo
+    const modal = document.getElementById('editarModal');
+    if (modal) {
+        modal.style.display = 'block'; // Exibe o modal
+    } else {
+        console.error("Modal não encontrado!");
+    }
 
     // Função para cancelar a edição
     document.getElementById('cancelarEditar').onclick = () => {
@@ -104,11 +126,15 @@ async function editarFalta(id) {
     form.onsubmit = async function(event) {
         event.preventDefault();  // Evita o envio tradicional do formulário
 
-        // Obtém os dados do formulário
-        const funcionario_id = document.getElementById('funcionarioSelect').value;
-        const data_inicio = document.getElementById('dataInicio').value;
-        const data_fim = document.getElementById('dataFim').value || null;  // Pode ser nulo
-        const motivo = document.getElementById('motivo').value;
+        // Obtém os dados do formulário do modal
+        const funcionario_id = Number(document.getElementById('modalFuncionarioSelect').value);  // Converter para número
+        const data_inicio = document.getElementById('modalDataInicio').value;
+        const data_fim = document.getElementById('modalDataFim').value || null;  // Pode ser nulo
+        const motivo = document.getElementById('modalMotivo').value;
+
+        console.log("Dados a serem enviados para atualização:", {
+            funcionario_id, data_inicio, data_fim, motivo
+        }); // Adicionando log para verificar os dados
 
         // Verifica se todos os campos obrigatórios estão preenchidos
         if (!funcionario_id || !data_inicio || !motivo) {
@@ -120,12 +146,13 @@ async function editarFalta(id) {
         const updateResponse = await fetch(`http://localhost:5000/faltas/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ funcionario_id, data_inicio, data_fim, motivo })
+            body: JSON.stringify({ funcionario_id, data_falta: data_inicio, data_fim, motivo })
         });
 
         if (updateResponse.ok) {
             showFeedback('success', 'Falta atualizada com sucesso!');
             carregarFaltasTabela(); // Atualiza a tabela com os novos dados
+            carregarFaltas();
             document.getElementById('editarModal').style.display = 'none'; // Fecha o modal
         } else {
             const error = await updateResponse.json();
